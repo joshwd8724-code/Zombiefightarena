@@ -1,0 +1,1356 @@
+local BASE_URL = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local KEY_FILE = "SurviveZombieArena.txt"
+local VALID_KEY = "Kyo-Goated"
+
+local KeyLib = loadstring(game:HttpGet(BASE_URL .. "Library.lua"))()
+
+local loadingKey = KeyLib:CreateLoading({
+    Title = "KyoHub",
+    Icon = nil
+    TotalSteps = 5,
+})
+loadingKey:SetMessage("Initialising KyoHub...")
+loadingKey:SetDescription("Please wait while we set things up.")
+task.wait(0.3)
+loadingKey:SetCurrentStep(1); loadingKey:SetDescription("Checking authentication...")
+task.wait(0.3)
+loadingKey:SetCurrentStep(2); loadingKey:SetDescription("Connecting to game services...")
+task.wait(0.3)
+loadingKey:SetCurrentStep(3); loadingKey:SetDescription("Loading features & modules...")
+task.wait(0.3)
+loadingKey:SetCurrentStep(4); loadingKey:SetDescription("Ready!")
+task.wait(0.4)
+loadingKey:Continue()
+
+local KeyWindow = KeyLib:CreateWindow({
+    Title = "KyoHub",
+    Footer = "Survive Zombie Arena v1.3",
+    Icon = 83889336114659,
+    NotifySide = "Right",
+    ShowCustomCursor = true,
+    Center = true,
+    AutoShow = true,
+    Size = UDim2.new(0, 500, 0, 260),
+})
+
+local KeyTab = KeyWindow:AddTab("Key System", "key")
+local KeyBox = KeyTab:AddLeftGroupbox("Enter Key", "lock")
+local InfoBox = KeyTab:AddRightGroupbox("Information", "info")
+
+local keyAuthenticated = false
+local savedKey = nil
+
+pcall(function()
+    if readfile then
+        savedKey = readfile(KEY_FILE)
+    end
+end)
+
+local inputKey = savedKey or ""
+
+KeyBox:AddInput("KeyInput", {
+    Text = "Key",
+    Default = savedKey or "",
+    Placeholder = "Type key here...",
+    ClearTextOnFocus = false,
+    Callback = function(v) inputKey = v end,
+})
+
+KeyBox:AddButton({
+    Text = "Submit Key",
+    Func = function()
+        if inputKey == VALID_KEY then
+            keyAuthenticated = true
+            pcall(function()
+                if writefile then writefile(KEY_FILE, inputKey) end
+            end)
+            KeyLib:Notify({ Title = "Success", Description = "Key accepted! Loading...", Time = 2 })
+            task.wait(1.5)
+            KeyLib:Unload()
+        else
+            KeyLib:Notify({ Title = "Error", Description = "Invalid key. Please try again.", Time = 3 })
+        end
+    end,
+})
+
+InfoBox:AddLabel({ Text = "How to get a key:", DoesWrap = true, Size = 14 })
+InfoBox:AddLabel({ Text = "1. Join our Discord server\n2. Go to #general\n3. Then type key", DoesWrap = true, Size = 12 })
+InfoBox:AddLabel("To get a key, join our Discord:")
+InfoBox:AddButton({
+    Text = "Copy Discord Link",
+    Func = function()
+        pcall(function() setclipboard("https://discord.gg/FEnRvn8wRk") end)
+        KeyLib:Notify({ Title = "Copied", Description = "Discord link copied!", Time = 2 })
+    end,
+})
+
+if savedKey == VALID_KEY then
+    keyAuthenticated = true
+    KeyLib:Unload()
+end
+
+task.wait(0.5)
+if not keyAuthenticated then
+    repeat task.wait(0.5) until keyAuthenticated
+end
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character
+if not Character then
+    Character = LocalPlayer.CharacterAdded:Wait()
+end
+
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+
+local DefaultWalkSpeed = Humanoid.WalkSpeed
+local DefaultJumpPower = Humanoid.JumpPower or 50
+local DefaultJumpHeight = Humanoid.JumpHeight or 7.2
+
+local UpgradeRemotes = ReplicatedStorage:WaitForChild("UpgradeRemotes")
+local PurchaseHealthUpgrade = UpgradeRemotes:WaitForChild("PurchaseHealthUpgrade")
+local PurchaseWeaponUpgrade = UpgradeRemotes:WaitForChild("PurchaseWeaponUpgrade")
+local WaveRemotes = ReplicatedStorage:WaitForChild("WaveRemotes")
+local SkipVote = WaveRemotes:WaitForChild("SkipVote")
+local GearRemotes = ReplicatedStorage:WaitForChild("GearRemotes")
+local GearPurchase = GearRemotes:WaitForChild("GearPurchase")
+
+local ZombieDamageRemote = nil
+local function EnsureZombieRemote()
+    if ZombieDamageRemote then return true end
+    pcall(function()
+        local zr = ReplicatedStorage:WaitForChild("ZombieRemotes")
+        ZombieDamageRemote = zr:WaitForChild("ZombieDamage", 5)
+    end)
+    return ZombieDamageRemote ~= nil
+end
+EnsureZombieRemote()
+
+local function FireZombieDamage(zombieId, damage)
+    if not EnsureZombieRemote() then return end
+    local ok = pcall(function()
+        ZombieDamageRemote:FireServer(zombieId, damage)
+    end)
+    if not ok then
+        EnsureZombieRemote()
+    end
+end
+
+local Config = {
+
+    KillAuraEnabled = false,
+    KillAuraMode = "V1",
+    KillAuraRange = 5000,
+    KillAuraDamage = 999999999,
+    KillAuraV2Multiplier = 1,
+    AutoEquip = false,
+    AutoBuyWeapon = false,
+    AutoBuyHealth = false,
+    AutoBuyGear = false,
+    AutoSkipWave = false,
+
+    ZombieESP = false,
+    PlayerESP = false,
+    NoFog = false,
+    FullBright = false,
+
+    SpeedHack = false,
+    SpeedValue = 24,
+    JumpHack = false,
+    JumpValue = 100,
+    TPSafeGround = false,
+    TPSafeSky = false,
+    TPSafeZoneV2 = false,
+    Fly = false,
+    FlySpeed = 50,
+    Noclip = false,
+
+    AntiAFK = false,
+    FPSUncap = false,
+    FPSCap = 60,
+    FPSBooster = false,
+    DPIScale = 100,
+
+    SelectedGear = "AutoTurret",
+}
+
+local WeaponTier = {
+    Pistol = 1, ShotGun = 2, Rifle = 3,
+    Minigun = 4, Revolver = 5, DualPistols = 6,
+    SMG = 7, CombatShotgun = 8, BurstRifle = 9,
+    AK47 = 10, Sniper = 11, HeavyRifle = 12,
+    Flamethrower = 13, MP5 = 14, USPS = 15,
+    GoldenAK47 = 16, EmberSMG = 17, LavaRifle = 18,
+    CoreBreaker = 19, LavaBow = 20, InfernoMinigun = 21,
+    LavaGatling = 22, GumdropBlaster = 23, ArticStriker = 24,
+    GalacticWeaver = 25, WorldEnder = 26, TommyGun = 27,
+}
+
+local WeaponDamage = {
+    Pistol = 17, Revolver = 65, DualPistols = 35,
+    USPS = 50, ShotGun = 40, SMG = 12,
+    CombatShotgun = 55, MP5 = 20, Rifle = 60,
+    BurstRifle = 160, AK47 = 90, Sniper = 500,
+    TommyGun = 70, HeavyRifle = 155, Minigun = 13,
+    Flamethrower = 104, GrenadeLauncher = 600, GumdropBlaster = 750,
+    ArticStriker = 400, GoldenAK47 = 450, EmberSMG = 275,
+    LavaRifle = 523, CoreBreaker = 629, LavaBow = 2160,
+    InfernoMinigun = 364, LavaGatling = 880, GalacticWeaver = 800,
+    WorldEnder = 1440, RPG = 1000, Plasma = 1500,
+}
+
+local GunConfig = nil
+pcall(function()
+    local data = ReplicatedStorage:WaitForChild("Data")
+    GunConfig = require(data:WaitForChild("GunConfig"))
+end)
+
+local function GetToolDamage(tool)
+    if not tool then return 10 end
+    if GunConfig and GunConfig.Guns and GunConfig.Guns[tool.Name] then
+        return GunConfig.Guns[tool.Name].Damage
+    end
+    local attr = tool:GetAttribute("Damage")
+    if attr then return attr end
+    local val = tool:FindFirstChild("Damage")
+    if val and (val:IsA("NumberValue") or val:IsA("IntValue")) then
+        return val.Value
+    end
+    return WeaponDamage[tool.Name] or 10
+end
+
+local BestWeapon = nil
+local BestTier = -1
+
+local function ScanForBestWeapon(container)
+    if not container then return end
+    for _, item in ipairs(container:GetChildren()) do
+        if item:IsA("Tool") and item:FindFirstChild("Handle") then
+            local tier = WeaponTier[item.Name] or 0
+            if tier > BestTier then
+                BestTier = tier
+                BestWeapon = item
+            end
+        end
+    end
+end
+
+local function TryAutoEquip()
+    if not Config.AutoEquip then return end
+    BestTier = -1
+    BestWeapon = nil
+    ScanForBestWeapon(Character)
+    ScanForBestWeapon(LocalPlayer:FindFirstChild("Backpack"))
+    if BestWeapon and BestWeapon ~= Character:FindFirstChildOfClass("Tool") then
+        pcall(function()
+            Humanoid:EquipTool(BestWeapon)
+        end)
+    end
+end
+
+local function GetZombies()
+    local results = {}
+
+    local zc = _G.ZombieClient
+    if zc and zc.Zombies then
+        for id, data in pairs(zc.Zombies) do
+            if data and not data.IsDying then
+                local pos = data.CurrentPosition or data.TargetPosition
+                if pos then
+                    table.insert(results, { id = id, pos = pos, data = data })
+                end
+            end
+        end
+        if #results > 0 then return results end
+    end
+
+    local folder = Workspace:FindFirstChild("Zombies_Local")
+    if folder then
+        for _, child in ipairs(folder:GetChildren()) do
+            if child:IsA("Model") and child.PrimaryPart then
+                local id = tonumber(child.Name:match("%d+$"))
+                          or child:GetAttribute("ZombieId")
+                if id then
+                    table.insert(results, { id = id, pos = child.PrimaryPart.Position, model = child })
+                end
+            end
+        end
+        if #results > 0 then return results end
+    end
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj.PrimaryPart then
+            local nameLow = obj.Name:lower()
+            if nameLow:find("zombie") then
+                local id = tonumber(obj.Name:match("%d+$"))
+                          or obj:GetAttribute("ZombieId")
+                          or obj:GetAttribute("Id")
+                if id then
+                    local duplicate = false
+                    for _, r in ipairs(results) do
+                        if r.id == id then duplicate = true; break end
+                    end
+                    if not duplicate then
+                        table.insert(results, { id = id, pos = obj.PrimaryPart.Position, model = obj })
+                    end
+                end
+            end
+        end
+    end
+
+    return results
+end
+
+local KillCooldowns = {}
+local KILL_COOLDOWN = 0.15
+local KillAuraV2Active = false
+
+task.spawn(function()
+    while true do
+        task.wait(30)
+        local now = os.clock()
+        for id, t in pairs(KillCooldowns) do
+            if now - t > 10 then KillCooldowns[id] = nil end
+        end
+    end
+end)
+
+local function KillAuraV1()
+    if not Config.KillAuraEnabled or Config.KillAuraMode ~= "V1" then return end
+    if not EnsureZombieRemote() then return end
+    if not RootPart or not RootPart.Parent then
+        Character = LocalPlayer.Character
+        if Character then
+            RootPart = Character:FindFirstChild("HumanoidRootPart")
+            Humanoid = Character:FindFirstChild("Humanoid")
+        end
+        if not RootPart then return end
+    end
+    local myPos = RootPart.Position
+    local now = os.clock()
+    for _, zombie in ipairs(GetZombies()) do
+        if typeof(zombie.pos) == "Vector3" then
+            if (zombie.pos - myPos).Magnitude <= Config.KillAuraRange then
+                local id = zombie.id
+                if not KillCooldowns[id] or now - KillCooldowns[id] >= KILL_COOLDOWN then
+                    KillCooldowns[id] = now
+                    FireZombieDamage(id, Config.KillAuraDamage)
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        if Config.KillAuraEnabled and Config.KillAuraMode == "V2" then
+            if not KillAuraV2Active then
+                Config.AutoEquip = true
+                TryAutoEquip()
+                KillAuraV2Active = true
+            end
+            if not EnsureZombieRemote() then continue end
+            if not Character or not Character.Parent or not Humanoid or not RootPart or not RootPart.Parent then
+                Character = LocalPlayer.Character
+                if Character then
+                    Humanoid = Character:FindFirstChild("Humanoid")
+                    RootPart = Character:FindFirstChild("HumanoidRootPart")
+                end
+            else
+                local tool = Character:FindFirstChildOfClass("Tool")
+                local damage = math.floor(GetToolDamage(tool) * Config.KillAuraV2Multiplier)
+                local now = os.clock()
+                for _, zombie in ipairs(GetZombies()) do
+                    if typeof(zombie.pos) == "Vector3" then
+                        local id = zombie.id
+                        if not KillCooldowns[id] or now - KillCooldowns[id] >= KILL_COOLDOWN then
+                            KillCooldowns[id] = now
+                            FireZombieDamage(id, damage)
+                        end
+                    end
+                end
+            end
+        else
+            if KillAuraV2Active then KillAuraV2Active = false end
+        end
+    end
+end)
+
+local AutoBuyTimers = { Weapon = 0, Health = 0, Gear = 0 }
+local AutoBuyNotified = { Weapon = false, Health = false, Gear = false }
+
+local function Notify(title, desc, t)
+
+end
+
+local function AutoBuyTick()
+    local now = os.clock()
+
+    if Config.AutoBuyWeapon and now - AutoBuyTimers.Weapon > 0.5 then
+        AutoBuyTimers.Weapon = now
+        pcall(function() PurchaseWeaponUpgrade:FireServer() end)
+        if not AutoBuyNotified.Weapon then
+            AutoBuyNotified.Weapon = true
+            Notify("Auto Buy", "Weapon Upgrade is active", 2)
+        end
+    end
+    if not Config.AutoBuyWeapon then AutoBuyNotified.Weapon = false end
+
+    if Config.AutoBuyHealth and now - AutoBuyTimers.Health > 0.5 then
+        AutoBuyTimers.Health = now
+        pcall(function() PurchaseHealthUpgrade:FireServer() end)
+        if not AutoBuyNotified.Health then
+            AutoBuyNotified.Health = true
+            Notify("Auto Buy", "Health Upgrade is active", 2)
+        end
+    end
+    if not Config.AutoBuyHealth then AutoBuyNotified.Health = false end
+
+    if Config.AutoBuyGear and now - AutoBuyTimers.Gear > 0.3 then
+        AutoBuyTimers.Gear = now
+        pcall(function() GearPurchase:FireServer(Config.SelectedGear) end)
+        if not AutoBuyNotified.Gear then
+            AutoBuyNotified.Gear = true
+            Notify("Auto Buy", Config.SelectedGear .. " is active", 2)
+        end
+    end
+    if not Config.AutoBuyGear then AutoBuyNotified.Gear = false end
+end
+
+local SafeGroundCFrame = nil
+local SafeZoneV2CFrame = nil
+local SkyOrigPos = nil
+local SkyPlatform = nil
+
+local function UpdateSpeed()
+    if not Humanoid then return end
+    if Config.SpeedHack then
+        Humanoid.WalkSpeed = Config.SpeedValue
+    else
+        if Humanoid.WalkSpeed ~= DefaultWalkSpeed then
+            Humanoid.WalkSpeed = DefaultWalkSpeed
+        end
+    end
+    if Config.JumpHack then
+        if Humanoid.UseJumpPower then
+            Humanoid.JumpPower = Config.JumpValue
+        else
+            Humanoid.JumpHeight = Config.JumpValue / 7
+        end
+    else
+        if Humanoid.UseJumpPower then
+            if Humanoid.JumpPower ~= DefaultJumpPower then Humanoid.JumpPower = DefaultJumpPower end
+        else
+            if Humanoid.JumpHeight ~= DefaultJumpHeight then Humanoid.JumpHeight = DefaultJumpHeight end
+        end
+    end
+end
+
+local SafeGroundPos = Vector3.new(22.22, 4, -167.02)
+local function UpdateTPSafeGround()
+    if not RootPart then return end
+    if Config.TPSafeGround then
+        if not SafeGroundCFrame then
+            SafeGroundCFrame = RootPart.CFrame
+            RootPart.CFrame = CFrame.new(SafeGroundPos)
+        end
+    else
+        if SafeGroundCFrame then
+            RootPart.CFrame = SafeGroundCFrame
+            SafeGroundCFrame = nil
+        end
+    end
+end
+
+local SafeZoneV2Pos = Vector3.new(-340.99, 458.54, -321.69)
+local function UpdateTPSafeZoneV2()
+    if not RootPart then return end
+    if Config.TPSafeZoneV2 then
+        if not SafeZoneV2CFrame then
+            SafeZoneV2CFrame = RootPart.CFrame
+            RootPart.CFrame = CFrame.new(SafeZoneV2Pos)
+        end
+    else
+        if SafeZoneV2CFrame then
+            RootPart.CFrame = SafeZoneV2CFrame
+            SafeZoneV2CFrame = nil
+        end
+    end
+end
+
+local function UpdateTPSafeSky()
+    if not RootPart then return end
+    if Config.TPSafeSky then
+        if not SkyOrigPos then
+            SkyOrigPos = RootPart.Position
+            local skyY = SkyOrigPos.Y + 40
+            if not SkyPlatform then
+                SkyPlatform = Instance.new("Part")
+                SkyPlatform.Name = "SkyPlatform"
+                SkyPlatform.Size = Vector3.new(50, 2, 50)
+                SkyPlatform.Anchored = true
+                SkyPlatform.Transparency = 1
+                SkyPlatform.CanCollide = true
+                SkyPlatform.Position = Vector3.new(SkyOrigPos.X, skyY - SkyPlatform.Size.Y / 2, SkyOrigPos.Z)
+                SkyPlatform.Parent = Workspace
+            end
+            RootPart.CFrame = CFrame.new(SkyOrigPos.X, skyY + (Humanoid.HipHeight or RootPart.Size.Y / 2), SkyOrigPos.Z)
+        end
+        if SkyPlatform then
+            SkyPlatform.Position = Vector3.new(RootPart.Position.X, SkyPlatform.Position.Y, RootPart.Position.Z)
+        end
+    else
+        if SkyOrigPos then
+            RootPart.CFrame = CFrame.new(SkyOrigPos)
+            SkyOrigPos = nil
+        end
+        if SkyPlatform then SkyPlatform:Destroy(); SkyPlatform = nil end
+    end
+end
+
+local function UpdateNoclip()
+    if not Character or not Config.Noclip then return end
+    for _, part in ipairs(Character:GetDescendants()) do
+        if part:IsA("BasePart") then part.CanCollide = false end
+    end
+end
+
+local BodyGyro = nil
+local BodyVelocity = nil
+local MobileFlyGui = nil
+local MobileInput = { up = false, down = false }
+
+local function CreateMobileFlyButtons()
+    if MobileFlyGui then return end
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MobileFlyButtons"
+    gui.IgnoreGuiInset = true
+    gui.DisplayOrder = 10
+    gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    local btnUp = Instance.new("TextButton")
+    btnUp.Size = UDim2.new(0, 80, 0, 80)
+    btnUp.Position = UDim2.new(1, -90, 0.5, -90)
+    btnUp.Text = "⬆ Fly Up"
+    btnUp.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    btnUp.TextColor3 = Color3.new(1, 1, 1)
+    btnUp.BorderSizePixel = 0
+    btnUp.Parent = gui
+
+    local btnDown = Instance.new("TextButton")
+    btnDown.Size = UDim2.new(0, 80, 0, 80)
+    btnDown.Position = UDim2.new(1, -90, 0.5, 10)
+    btnDown.Text = "⬇ Fly Down"
+    btnDown.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+    btnDown.TextColor3 = Color3.new(1, 1, 1)
+    btnDown.BorderSizePixel = 0
+    btnDown.Parent = gui
+
+    btnUp.MouseButton1Down:Connect(function() MobileInput.up = true end)
+    btnUp.MouseButton1Up:Connect(function() MobileInput.up = false end)
+    btnDown.MouseButton1Down:Connect(function() MobileInput.down = true end)
+    btnDown.MouseButton1Up:Connect(function() MobileInput.down = false end)
+
+    MobileFlyGui = { gui = gui, input = MobileInput }
+end
+
+local function DestroyMobileFlyButtons()
+    if MobileFlyGui then
+        pcall(function() MobileFlyGui.gui:Destroy() end)
+        MobileFlyGui = nil
+    end
+end
+
+local function EnableFly()
+    if not RootPart then return end
+    Humanoid.PlatformStand = true
+    if not BodyGyro then
+        BodyGyro = Instance.new("BodyGyro")
+        BodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+        BodyGyro.P = 30000
+        BodyGyro.Parent = RootPart
+    end
+    if not BodyVelocity then
+        BodyVelocity = Instance.new("BodyVelocity")
+        BodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+        BodyVelocity.Velocity = Vector3.zero
+        BodyVelocity.Parent = RootPart
+    end
+    if UserInputService.TouchEnabled then
+        CreateMobileFlyButtons()
+    end
+end
+
+local function DisableFly()
+    if Humanoid then Humanoid.PlatformStand = false end
+    if BodyGyro then BodyGyro:Destroy(); BodyGyro = nil end
+    if BodyVelocity then BodyVelocity:Destroy(); BodyVelocity = nil end
+    DestroyMobileFlyButtons()
+end
+
+local function UpdateFlyVelocity()
+    if not BodyVelocity or not BodyGyro then return end
+    local cam = Workspace.CurrentCamera
+    if not cam then return end
+
+    local dir = Vector3.zero
+
+    if not UserInputService.TouchEnabled then
+
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            dir = dir + cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            dir = dir - cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            dir = dir + cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            dir = dir - cam.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            dir = dir + Vector3.yAxis
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            dir = dir - Vector3.yAxis
+        end
+    else
+
+        if Humanoid and Humanoid.MoveDirection.Magnitude > 0 then
+            local md = Humanoid.MoveDirection
+            dir = cam.CFrame.LookVector * md.Z + cam.CFrame.RightVector * md.X
+        end
+        if MobileFlyGui and MobileFlyGui.input.up then dir = dir + Vector3.yAxis end
+        if MobileFlyGui and MobileFlyGui.input.down then dir = dir - Vector3.yAxis end
+    end
+
+    if dir.Magnitude > 0 then
+        BodyVelocity.Velocity = dir.Unit * Config.FlySpeed
+    else
+        BodyVelocity.Velocity = Vector3.zero
+    end
+    BodyGyro.CFrame = cam.CFrame
+end
+
+local ESPObjects = {}
+
+local function ClearESP()
+    for _, gui in ipairs(ESPObjects) do
+        pcall(function() gui:Destroy() end)
+    end
+    ESPObjects = {}
+end
+
+local function RefreshESP()
+    ClearESP()
+    if Config.ZombieESP then
+        for _, zombie in ipairs(GetZombies()) do
+            if zombie.model and zombie.model.PrimaryPart then
+                local bb = Instance.new("BillboardGui")
+                bb.AlwaysOnTop = true
+                bb.Size = UDim2.new(0, 80, 0, 30)
+                bb.StudsOffset = Vector3.new(0, 2.5, 0)
+                bb.Parent = zombie.model.PrimaryPart
+                local lbl = Instance.new("TextLabel")
+                lbl.BackgroundTransparency = 1
+                lbl.Size = UDim2.new(1, 0, 1, 0)
+                lbl.TextColor3 = Color3.fromRGB(255, 60, 60)
+                lbl.TextStrokeTransparency = 0.5
+                lbl.Text = "Zombie"
+                lbl.Parent = bb
+                table.insert(ESPObjects, bb)
+            end
+        end
+    end
+    if Config.PlayerESP then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local bb = Instance.new("BillboardGui")
+                    bb.AlwaysOnTop = true
+                    bb.Size = UDim2.new(0, 100, 0, 25)
+                    bb.StudsOffset = Vector3.new(0, 3, 0)
+                    bb.Parent = hrp
+                    local lbl = Instance.new("TextLabel")
+                    lbl.BackgroundTransparency = 1
+                    lbl.Size = UDim2.new(1, 0, 1, 0)
+                    lbl.TextColor3 = Color3.fromRGB(0, 255, 100)
+                    lbl.TextStrokeTransparency = 0.5
+                    lbl.Text = plr.Name
+                    lbl.Parent = bb
+                    table.insert(ESPObjects, bb)
+                end
+            end
+        end
+    end
+end
+
+local SavedLighting = {}
+
+local function SetFullBright(enabled)
+    if enabled then
+        if not SavedLighting.saved then
+            SavedLighting = {
+                Ambient = Lighting.Ambient,
+                Brightness = Lighting.Brightness,
+                OutdoorAmbient = Lighting.OutdoorAmbient,
+                ClockTime = Lighting.ClockTime,
+                GlobalShadows = Lighting.GlobalShadows,
+                saved = true,
+            }
+        end
+        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+        Lighting.Brightness = 3
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+        Lighting.ClockTime = 14
+        Lighting.GlobalShadows = false
+        if not Config.NoFog then
+            Lighting.FogEnd = 999999
+            Lighting.FogStart = 99999
+        end
+    else
+        if SavedLighting.saved then
+            Lighting.Ambient = SavedLighting.Ambient
+            Lighting.Brightness = SavedLighting.Brightness
+            Lighting.OutdoorAmbient = SavedLighting.OutdoorAmbient
+            Lighting.ClockTime = SavedLighting.ClockTime
+            Lighting.GlobalShadows = SavedLighting.GlobalShadows
+            SavedLighting.saved = false
+        end
+        if not Config.NoFog then
+            Lighting.FogEnd = 5000
+            Lighting.FogStart = 1000
+        end
+    end
+end
+
+local function SetNoFog(enabled)
+    if enabled then
+        Lighting.FogEnd = 999999
+        Lighting.FogStart = 99999
+    else
+        if not Config.FullBright then
+            Lighting.FogEnd = 5000
+            Lighting.FogStart = 1000
+        end
+    end
+end
+
+local function ApplyFPSSettings()
+    if Config.FPSUncap then
+        pcall(function() setfpscap(Config.FPSCap) end)
+    else
+        pcall(function() setfpscap(0) end)
+    end
+end
+
+local FPSBoostActive = false
+local FPSBoostSaved = {}
+local FPSBoostConn = nil
+
+local function EnableFPSBooster()
+    if FPSBoostActive then return end
+    FPSBoostActive = true
+
+    FPSBoostSaved.GlobalShadows = Lighting.GlobalShadows
+    FPSBoostSaved.Brightness = Lighting.Brightness
+    FPSBoostSaved.FogEnd = Lighting.FogEnd
+    pcall(function() FPSBoostSaved.TerrainDeco = Terrain.Decoration end)
+    pcall(function() FPSBoostSaved.WaterWaveSize = Terrain.WaterWaveSize end)
+    pcall(function() FPSBoostSaved.WaterWaveSpeed = Terrain.WaterWaveSpeed end)
+    pcall(function() FPSBoostSaved.WaterReflect = Terrain.WaterReflectance end)
+    pcall(function() FPSBoostSaved.WaterTransp = Terrain.WaterTransparency end)
+    pcall(function() FPSBoostSaved.QualityLevel = settings().rendering.QualityLevel end)
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            pcall(function()
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Reflectance = 0
+                obj.CastShadow = false
+            end)
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            pcall(function() obj:Destroy() end)
+        end
+    end
+
+    for _, child in ipairs(Lighting:GetChildren()) do
+        if child:IsA("PostProcessEffect") then
+            pcall(function() child.Enabled = false end)
+        end
+    end
+
+    if Terrain then
+        pcall(function() Terrain.Decoration = false end)
+        pcall(function() Terrain.WaterWaveSize = 0 end)
+        pcall(function() Terrain.WaterWaveSpeed = 0 end)
+        pcall(function() Terrain.WaterReflectance = 0 end)
+        pcall(function() Terrain.WaterTransparency = 0 end)
+    end
+
+    local clouds = Workspace:FindFirstChild("Clouds")
+    if clouds then pcall(function() clouds:Destroy() end) end
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") then
+            pcall(function() obj:Destroy() end)
+        end
+    end
+
+    pcall(function()
+        settings().physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Always
+    end)
+    pcall(function()
+        settings().rendering.QualityLevel = Enum.QualityLevel.Level1
+    end)
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            pcall(function()
+                obj.Velocity = Vector3.zero
+                obj.RotVelocity = Vector3.zero
+            end)
+        end
+    end
+
+    Lighting.GlobalShadows = false
+    Lighting.Brightness = 3
+    Lighting.FogEnd = 9000000000
+
+    pcall(function()
+        if sethiddenproperty then
+            sethiddenproperty(Lighting, "Technology", Enum.Technology.Compatibility)
+        end
+    end)
+
+    FPSBoostConn = game.DescendantAdded:Connect(function(obj)
+        if not Config.FPSBooster then return end
+        if obj:IsA("BasePart") then
+            pcall(function()
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Reflectance = 0
+                obj.CastShadow = false
+            end)
+        elseif obj:IsA("Decal") then
+            pcall(function() obj:Destroy() end)
+        end
+    end)
+
+    Notify("FPS Booster", "Ultra FPS Boost enabled!", 2)
+end
+
+local function DisableFPSBooster()
+    if not FPSBoostActive then return end
+    FPSBoostActive = false
+
+    if FPSBoostConn then FPSBoostConn:Disconnect(); FPSBoostConn = nil end
+
+    pcall(function() Lighting.GlobalShadows = FPSBoostSaved.GlobalShadows end)
+    pcall(function() Lighting.Brightness = FPSBoostSaved.Brightness end)
+    pcall(function() Lighting.FogEnd = FPSBoostSaved.FogEnd end)
+
+    for _, child in ipairs(Lighting:GetChildren()) do
+        if child:IsA("PostProcessEffect") then
+            pcall(function() child.Enabled = true end)
+        end
+    end
+
+    if Terrain then
+        pcall(function() Terrain.Decoration = FPSBoostSaved.TerrainDeco end)
+        pcall(function() Terrain.WaterWaveSize = FPSBoostSaved.WaterWaveSize end)
+        pcall(function() Terrain.WaterWaveSpeed = FPSBoostSaved.WaterWaveSpeed end)
+        pcall(function() Terrain.WaterReflectance = FPSBoostSaved.WaterReflect end)
+        pcall(function() Terrain.WaterTransparency = FPSBoostSaved.WaterTransp end)
+    end
+
+    pcall(function()
+        settings().rendering.QualityLevel = FPSBoostSaved.QualityLevel
+    end)
+
+    Notify("FPS Booster", "Disabled - Settings restored", 2)
+end
+
+local AntiAFKIdledConn = nil
+local AntiAFKJumpTimer = 0
+local AntiAFKMoveTimer = 0
+local AntiAFKMoveDir = false
+
+local function SetupAntiAFK()
+    if AntiAFKIdledConn then AntiAFKIdledConn:Disconnect() end
+    AntiAFKIdledConn = LocalPlayer.Idled:Connect(function()
+        if Config.AntiAFK then
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end
+    end)
+end
+SetupAntiAFK()
+
+local function AntiAFKTick()
+    if not Config.AntiAFK or Config.Fly then return end
+    if not Humanoid or Humanoid.Health <= 0 or not RootPart then return end
+    local now = os.clock()
+    if now - AntiAFKJumpTimer > 7 then
+        AntiAFKJumpTimer = now
+        pcall(function() Humanoid.Jump = true end)
+    end
+    if now - AntiAFKMoveTimer > 30 then
+        AntiAFKMoveTimer = now
+        AntiAFKMoveDir = not AntiAFKMoveDir
+        local dir = AntiAFKMoveDir and 1 or -1
+        pcall(function()
+            Humanoid:Move(Vector3.new(dir, 0, 0), true)
+            task.wait(0.1)
+            Humanoid:Move(Vector3.new(0, 0, 0), true)
+        end)
+    end
+end
+
+local BlackScreenGui = nil
+local function SetBlackScreen(enabled)
+    if enabled then
+        if not BlackScreenGui then
+            BlackScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+            BlackScreenGui.Name = "BlackScreen"
+            BlackScreenGui.IgnoreGuiInset = true
+            BlackScreenGui.DisplayOrder = 2000000000
+            local frame = Instance.new("Frame", BlackScreenGui)
+            frame.BackgroundColor3 = Color3.new(0, 0, 0)
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BorderSizePixel = 0
+        end
+    else
+        if BlackScreenGui then BlackScreenGui:Destroy(); BlackScreenGui = nil end
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    Humanoid = char:WaitForChild("Humanoid")
+    RootPart = char:WaitForChild("HumanoidRootPart")
+    DefaultWalkSpeed = Humanoid.WalkSpeed
+    DefaultJumpPower = Humanoid.JumpPower or 50
+    DefaultJumpHeight = Humanoid.JumpHeight or 7.2
+
+    Config.TPSafeGround = false; SafeGroundCFrame = nil
+    Config.TPSafeSky = false; SkyOrigPos = nil
+    Config.TPSafeZoneV2 = false; SafeZoneV2CFrame = nil
+    if SkyPlatform then SkyPlatform:Destroy(); SkyPlatform = nil end
+
+    AutoBuyNotified.Weapon = false
+    AutoBuyNotified.Health = false
+    AutoBuyNotified.Gear = false
+
+    DisableFly()
+    SetupAntiAFK()
+    if Config.FPSBooster then
+        task.wait(0.5)
+        EnableFPSBooster()
+    end
+end)
+
+local ESPTimer = 0
+local HeartbeatConn = RunService.Heartbeat:Connect(function()
+    KillAuraV1()
+    AutoBuyTick()
+    TryAutoEquip()
+    UpdateSpeed()
+    UpdateTPSafeGround()
+    UpdateTPSafeZoneV2()
+    UpdateTPSafeSky()
+    UpdateNoclip()
+    AntiAFKTick()
+
+    if Config.Fly then
+        EnableFly()
+        UpdateFlyVelocity()
+    else
+        DisableFly()
+    end
+
+    local now = os.clock()
+    if now - ESPTimer > 1 then
+        ESPTimer = now
+        if Config.ZombieESP or Config.PlayerESP then
+            RefreshESP()
+        else
+            ClearESP()
+        end
+    end
+end)
+
+local Library = loadstring(game:HttpGet(BASE_URL .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(BASE_URL .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(BASE_URL .. "addons/SaveManager.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Black69Weeds/Scripts/main/Anticheat%20bypass.lua"))()
+
+Notify = function(title, desc, t)
+    Library:Notify({ Title = title, Description = desc, Time = t or 1.5 })
+end
+
+Library.ForceCheckbox = false
+Library.ShowToggleFrameInKeybinds = true
+pcall(function() Library:SetDPIScale(Config.DPIScale) end)
+
+local loading2 = Library:CreateLoading({
+    Title = "SyzenHub",
+    Icon = 83889336114659,
+    TotalSteps = 4,
+})
+loading2:SetMessage("Loading SyzenHub...")
+loading2:SetDescription("Preparing your experience")
+task.wait(0.3); loading2:SetCurrentStep(1); loading2:SetDescription("Loading modules...")
+task.wait(0.3); loading2:SetCurrentStep(2); loading2:SetDescription("Applying settings...")
+task.wait(0.3); loading2:SetCurrentStep(3); loading2:SetDescription("Almost ready!")
+task.wait(0.3); loading2:SetCurrentStep(4); loading2:SetDescription("Welcome!")
+task.wait(0.4); loading2:Continue()
+
+local Window = Library:CreateWindow({
+    Title = "SyzenHub",
+    Footer = "Survive Zombie Arena v1.3",
+    Icon = 83889336114659,
+    NotifySide = "Right",
+    ShowCustomCursor = true,
+    Center = true,
+    AutoShow = true,
+})
+
+local Tabs = {
+    Main = Window:AddTab("Main", "zap", "Combat & automation"),
+    Movement = Window:AddTab("Movement", "footprints","Speed, fly & teleports"),
+    Visual = Window:AddTab("Visual", "eye", "ESP & world tweaks"),
+    Config = Window:AddTab("Config", "settings", "Theme & save configs"),
+}
+
+local CombatBox = Tabs.Main:AddLeftGroupbox("Kill Aura", "crosshair")
+
+CombatBox:AddToggle("KillAuraEnabled", {
+    Text = "Kill Aura",
+    Default = false,
+    Tooltip = "Fire ZombieDamage remote on all zombies in range",
+    Callback = function(v) Config.KillAuraEnabled = v end,
+})
+
+CombatBox:AddDropdown("KillAuraMode", {
+    Text = "Mode",
+    Default = "V1",
+    Values = { "V1", "V2" },
+    Callback = function(v) Config.KillAuraMode = v end,
+})
+
+CombatBox:AddSlider("KillAuraRange", {
+    Text = "Range",
+    Default = 5000,
+    Min = 100,
+    Max = 5000,
+    Rounding = 0,
+    Callback = function(v) Config.KillAuraRange = v end,
+})
+
+CombatBox:AddDivider()
+
+CombatBox:AddSlider("KillAuraDamage", {
+    Text = "Damage (V1)",
+    Default = 999999999,
+    Min = 1000,
+    Max = 999999999,
+    Rounding = 0,
+    Callback = function(v) Config.KillAuraDamage = v end,
+})
+
+CombatBox:AddSlider("KillAuraV2Multiplier", {
+    Text = "Multiplier (V2)",
+    Default = 1,
+    Min = 1,
+    Max = 100,
+    Rounding = 1,
+    Callback = function(v) Config.KillAuraV2Multiplier = v end,
+})
+
+local AutoBox = Tabs.Main:AddRightGroupbox("Automation", "zap")
+
+AutoBox:AddToggle("AutoEquip", {
+    Text = "Auto Equip",
+    Default = false,
+    Callback = function(v) Config.AutoEquip = v end,
+})
+
+AutoBox:AddDivider()
+
+AutoBox:AddToggle("AutoBuyWeapon", {
+    Text = "Auto Buy Weapon",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyWeapon = v
+        if v then Notify("Auto Buy", "Weapon Upgrade enabled", 2) end
+    end,
+})
+
+AutoBox:AddToggle("AutoBuyHealth", {
+    Text = "Auto Buy Health",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyHealth = v
+        if v then Notify("Auto Buy", "Health Upgrade enabled", 2) end
+    end,
+})
+
+AutoBox:AddToggle("AutoBuyGear", {
+    Text = "Auto Buy Gear",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyGear = v
+        if v then Notify("Auto Buy", Config.SelectedGear .. " Gear enabled", 2) end
+    end,
+})
+
+AutoBox:AddDropdown("SelectedGear", {
+    Text = "Gear Type",
+    Default = "AutoTurret",
+    Values = {
+        "Landmine","LaserTurret","AutoTurret","Barricade","SteelBarricade",
+        "FlamethrowerTurret","ShockwaveMine","HealingStation","MendingTower",
+        "StimShot","Molotov","VanguardTurret","Cloak","Shuriken","BladeFury",
+        "SoulHarvester","RaiseUndead","DeathNova","FragGrenade","Deadeye",
+        "TargetMark","Drone","Spikes","Bunker",
+    },
+    Callback = function(v) Config.SelectedGear = v end,
+})
+
+local MiscCombatBox = Tabs.Main:AddLeftGroupbox("Misc", "settings")
+
+MiscCombatBox:AddToggle("AutoSkipWave", {
+    Text = "Auto Skip Wave",
+    Default = false,
+    Callback = function(v) Config.AutoSkipWave = v end,
+})
+
+local SpeedBox = Tabs.Movement:AddLeftGroupbox("Speed & Jump", "footprints")
+
+SpeedBox:AddToggle("SpeedHack", {
+    Text = "Speed Hack",
+    Default = false,
+    Callback = function(v) Config.SpeedHack = v end,
+})
+
+SpeedBox:AddSlider("SpeedValue", {
+    Text = "Walk Speed",
+    Default = 24,
+    Min = 16,
+    Max = 200,
+    Rounding = 0,
+    Callback = function(v) Config.SpeedValue = v end,
+})
+
+SpeedBox:AddToggle("JumpHack", {
+    Text = "Jump Hack",
+    Default = false,
+    Callback = function(v) Config.JumpHack = v end,
+})
+
+SpeedBox:AddSlider("JumpValue", {
+    Text = "Jump Power",
+    Default = 100,
+    Min = 50,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(v) Config.JumpValue = v end,
+})
+
+local FlyBox = Tabs.Movement:AddRightGroupbox("Fly & Noclip", "wind")
+
+FlyBox:AddToggle("Fly", {
+    Text = "Fly",
+    Default = false,
+    Callback = function(v)
+        Config.Fly = v
+        if not v then DisableFly() end
+    end,
+})
+
+FlyBox:AddSlider("FlySpeed", {
+    Text = "Fly Speed",
+    Default = 50,
+    Min = 10,
+    Max = 200,
+    Rounding = 0,
+    Callback = function(v) Config.FlySpeed = v end,
+})
+
+FlyBox:AddToggle("Noclip", {
+    Text = "Noclip",
+    Default = false,
+    Callback = function(v) Config.Noclip = v end,
+})
+
+local TPBox = Tabs.Movement:AddLeftGroupbox("Teleports", "map-pin")
+
+TPBox:AddToggle("TPSafeGround", {
+    Text = "TP Safe Ground",
+    Default = false,
+    Callback = function(v) Config.TPSafeGround = v end,
+})
+
+TPBox:AddToggle("TPSafeSky", {
+    Text = "TP Safe Sky",
+    Default = false,
+    Callback = function(v)
+        Config.TPSafeSky = v
+        if not v then
+            if SkyOrigPos and RootPart then RootPart.CFrame = CFrame.new(SkyOrigPos) end
+            SkyOrigPos = nil
+            if SkyPlatform then SkyPlatform:Destroy(); SkyPlatform = nil end
+        end
+    end,
+})
+
+TPBox:AddToggle("TPSafeZoneV2", {
+    Text = "TP Safe Zone V2",
+    Default = false,
+    Callback = function(v) Config.TPSafeZoneV2 = v end,
+})
+
+local ESPBox = Tabs.Visual:AddLeftGroupbox("ESP", "eye")
+
+ESPBox:AddToggle("ZombieESP", {
+    Text = "Zombie ESP",
+    Default = false,
+    Callback = function(v)
+        Config.ZombieESP = v
+        RefreshESP()
+    end,
+})
+
+ESPBox:AddToggle("PlayerESP", {
+    Text = "Player ESP",
+    Default = false,
+    Callback = function(v)
+        Config.PlayerESP = v
+        RefreshESP()
+    end,
+})
+
+local WorldBox = Tabs.Visual:AddRightGroupbox("World", "sun")
+
+WorldBox:AddDivider()
+WorldBox:AddLabel("Lighting & FPS")
+
+WorldBox:AddToggle("FPSUncap", {
+    Text = "FPS Uncap",
+    Default = false,
+    Callback = function(v) Config.FPSUncap = v; ApplyFPSSettings() end,
+})
+
+WorldBox:AddSlider("FPSCap", {
+    Text = "FPS Cap",
+    Default = 60,
+    Min = 10,
+    Max = 600,
+    Rounding = 0,
+    Callback = function(v)
+        Config.FPSCap = v
+        if Config.FPSUncap then ApplyFPSSettings() end
+    end,
+})
+
+local MiscBox = Tabs.Visual:AddLeftGroupbox("Misc", "settings")
+
+MiscBox:AddToggle("AntiAFK", {
+    Text = "Anti AFK",
+    Default = false,
+    Callback = function(v)
+        Config.AntiAFK = v
+        if v then
+            SetupAntiAFK()
+        else
+            if AntiAFKIdledConn then AntiAFKIdledConn:Disconnect() end
+        end
+    end,
+})
+
+MiscBox:AddToggle("NoFog", {
+    Text = "No Fog",
+    Default = false,
+    Callback = function(v) Config.NoFog = v; SetNoFog(v) end,
+})
+
+MiscBox:AddToggle("FullBright", {
+    Text = "Full Bright",
+    Default = false,
+    Callback = function(v) Config.FullBright = v; SetFullBright(v) end,
+})
+
+MiscBox:AddToggle("FPSBooster", {
+    Text = "FPS Booster",
+    Default = false,
+    Callback = function(v)
+        Config.FPSBooster = v
+        if v then EnableFPSBooster() else DisableFPSBooster() end
+    end,
+})
+
+ThemeManager:SetLibrary(Library)
+pcall(function() ThemeManager:SetDefault("Fatality") end)
+
+SaveManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({ "KeyInput" })
+SaveManager:SetFolder("SyzenHub")
+SaveManager:BuildConfigSection(Tabs.Config)
+SaveManager:ApplyToTab(Tabs.Config)
+
+ThemeManager:SetFolder("SyzenHub")
+ThemeManager:BuildConfigSection(Tabs.Config)
+ThemeManager:ApplyToTab(Tabs.Config)
+
+pcall(function() SaveManager:LoadAutoloadConfig() end)
+
+local SkipVoteTimer = 0
+local SkipVoteHeartbeat = RunService.Heartbeat:Connect(function()
+    if Config.AutoSkipWave and os.clock() - SkipVoteTimer > 5 then
+        SkipVoteTimer = os.clock()
+        pcall(function() SkipVote:FireServer(true) end)
+    end
+end)
+
+Library.OnUnload:Connect(function()
+    HeartbeatConn:Disconnect()
+    SkipVoteHeartbeat:Disconnect()
+    if AntiAFKIdledConn then AntiAFKIdledConn:Disconnect() end
+    if FPSBoostConn then FPSBoostConn:Disconnect() end
+
+    DisableFly()
+    ClearESP()
+    SetBlackScreen(false)
+    DisableFPSBooster()
+
+    if Humanoid then
+        Humanoid.WalkSpeed = DefaultWalkSpeed
+        if Humanoid.UseJumpPower then
+            Humanoid.JumpPower = DefaultJumpPower
+        else
+            Humanoid.JumpHeight = DefaultJumpHeight
+        end
+    end
+    if RootPart then RootPart.Anchored = false end
+    if SkyPlatform then SkyPlatform:Destroy(); SkyPlatform = nil end
+
+    SetFullBright(false)
+    SetNoFog(false)
+    Lighting.GlobalShadows = true
+    Lighting.FogEnd = 5000
+    Lighting.FogStart = 1000
+
+    pcall(function() setfpscap(0) end)
+end)
