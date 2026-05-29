@@ -10,7 +10,7 @@ local loadingKey = KeyLib:CreateLoading({
     TotalSteps = 5,
 })
 loadingKey:SetMessage("Initialising SaeHub...")
-loadingKey:SetDescription("Please wait while we set things up.")
+loadingKey:SetDescription("Please wait while we set and ready things up.")
 task.wait(0.3)
 loadingKey:SetCurrentStep(1); loadingKey:SetDescription("Checking authentication...")
 task.wait(0.3)
