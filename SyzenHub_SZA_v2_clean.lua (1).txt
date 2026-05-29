@@ -5,11 +5,11 @@ local VALID_KEY = "ThankYouForSupportingMe"
 local KeyLib = loadstring(game:HttpGet(BASE_URL .. "Library.lua"))()
 
 local loadingKey = KeyLib:CreateLoading({
-    Title = "SyzenHub",
+    Title = "SaeHub",
     Icon = 83889336114659,
     TotalSteps = 5,
 })
-loadingKey:SetMessage("Initialising SyzenHub...")
+loadingKey:SetMessage("Initialising SaeHub...")
 loadingKey:SetDescription("Please wait while we set things up.")
 task.wait(0.3)
 loadingKey:SetCurrentStep(1); loadingKey:SetDescription("Checking authentication...")
@@ -23,7 +23,7 @@ task.wait(0.4)
 loadingKey:Continue()
 
 local KeyWindow = KeyLib:CreateWindow({
-    Title = "SyzenHub",
+    Title = "SaeHub",
     Footer = "Survive Zombie Arena v1.3",
     Icon = 83889336114659,
     NotifySide = "Right",
