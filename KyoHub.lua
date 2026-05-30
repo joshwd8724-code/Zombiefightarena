@@ -994,4 +994,57 @@ function LoadMainHub()
     })
 end
 
+local Autos = MainTab:Section({
+      Title = "Auto",
+      Icon = "crosshair"
+   )}
+
+AutoBox:AddToggle("AutoEquip", {
+    Title = "Auto Equip",
+    Default = false,
+    Callback = function(v) Config.AutoEquip = v end,
+})
+
+AutoBox:AddDivider()
+
+AutoBox:AddToggle("AutoBuyWeapon", {
+    Title = "Auto Buy Weapon",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyWeapon = v
+        if v then Notify("Auto Buy", "Weapon Upgrade enabled", 2) end
+    end,
+})
+
+AutoBox:AddToggle("AutoBuyHealth", {
+    Title = "Auto Buy Health",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyHealth = v
+        if v then Notify("Auto Buy", "Health Upgrade enabled", 2) end
+    end,
+})
+
+AutoBox:AddToggle("AutoBuyGear", {
+    Title = "Auto Buy Gear",
+    Default = false,
+    Callback = function(v)
+        Config.AutoBuyGear = v
+        if v then Notify("Auto Buy", Config.SelectedGear .. " Gear enabled", 2) end
+    end,
+})
+
+AutoBox:AddDropdown("SelectedGear", {
+    Title = "Gear Type",
+    Default = "AutoTurret",
+    Values = {
+        "Landmine","LaserTurret","AutoTurret","Barricade","SteelBarricade",
+        "FlamethrowerTurret","ShockwaveMine","HealingStation","MendingTower",
+        "StimShot","Molotov","VanguardTurret","Cloak","Shuriken","BladeFury",
+        "SoulHarvester","RaiseUndead","DeathNova","FragGrenade","Deadeye",
+        "TargetMark","Drone","Spikes","Bunker",
+    },
+    Callback = function(v) Config.SelectedGear = v end,
+})
+
 LoadMainHub()
