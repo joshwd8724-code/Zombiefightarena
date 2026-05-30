@@ -960,7 +960,7 @@ function LoadMainHub()
     
     CombatBox:Slider({
         Title = "Range",
-        Step = 1,
+        Rounding = 1,
         Value = {
         Min = 100,
         Max = 5000,
@@ -973,7 +973,7 @@ function LoadMainHub()
 
     CombatBox:Slider({
         Title = "Damage (V1)",
-        Step = 1,
+        Rounding = 1,
         Value = {
         Min = 1000,
         Max = 999999999,
@@ -986,10 +986,11 @@ function LoadMainHub()
 
     CombatBox:Slider({
         Title = "Multiplier (V2)",
-        Step = 1,
+        Rounding = 1,
         Value = {
         Min = 1,
         Max = 100,
+        Default = 1,
     },
         Callback = function(v)
             Config.KillAuraV2Multiplier = v
