@@ -944,6 +944,11 @@ function LoadMainHub()
         Title = "Information"
     })
 
+    InfoSection:Paragraph({
+    Title = "Welcome",
+    Desc = "Thank you for using KyoHub! Join our Discord for updates."
+})
+
     local CombatBox = MainTab:Section({
         Title = "Kill Aura",
         Icon = "crosshair"
@@ -1005,10 +1010,6 @@ end
 
 -- MUST CALL THIS
 
-InfoSection:Paragraph({
-  Title = "Welcome",
-  Desc = "Thank you for usimg kyo hub! If you want to help us grow our community, feel free to chat in our discord server or become a content creator and promote our scripts."
-})
 
 LoadMainHub()
 -- KEY WINDOW
