@@ -946,22 +946,21 @@ function LoadMainHub()
     })
 
     CombatBox:Toggle({
-        Text = "Kill Aura",
+        Title = "Kill Aura",
         Default = false,
         Tooltip = "Fire ZombieDamage remote on all zombies in range",
         Callback = function(v) Config.KillAuraEnabled = v end,
 })
 
     CombatBox:Dropdown({
-        Text = "Mode",
+        Title = "Mode",
         Default = "V1",
         Values = { "V1", "V2" },
-        Default = "V1",
         Callback = function(v) Config.KillAuraMode = v end,
 })
     
     CombatBox:Slider({
-        Text = "Range",
+        Title = "Range",
         Step = 1,
         Value = {
         Min = 100,
@@ -974,7 +973,7 @@ function LoadMainHub()
     CombatBox:Divider()
 
     CombatBox:Slider({
-        Text = "Damage (V1)",
+        Title = "Damage (V1)",
         Default = 999999999,
         Min = 1000,
         Max = 999999999,
@@ -985,7 +984,7 @@ function LoadMainHub()
     })
 
     CombatBox:Slider({
-        Text = "Multiplier (V2)",
+        Title = "Multiplier (V2)",
         Default = 1,
         Min = 1,
         Max = 100,
