@@ -996,7 +996,7 @@ function LoadMainHub()
 local Autos = MainTab:Section({
       Title = "Auto",
       Icon = "crosshair"
-)}
+})
 
 Autos:AddToggle("AutoEquip", {
     Title = "Auto Equip",
@@ -1011,7 +1011,13 @@ Autos:AddToggle("AutoBuyWeapon", {
     Default = false,
     Callback = function(v)
         Config.AutoBuyWeapon = v
-        if v then Notify("Auto Buy", "Weapon Upgrade enabled", 2) end
+        if v then 
+    WindUI:Notify({
+           Title = "Auto Buy Weapon",
+           Content = "Auto Buy Weapon enabled",
+           Duration = 2
+    )}
+                end
     end,
 })
 
@@ -1020,7 +1026,13 @@ Autos:AddToggle("AutoBuyHealth", {
     Default = false,
     Callback = function(v)
         Config.AutoBuyHealth = v
-        if v then Notify("Auto Buy", "Health Upgrade enabled", 2) end
+        if v then 
+    WindUI:Notify({
+        Title = "Auto Health",
+        Content = "Auto Health Upgrade enabled",
+        Duration = 2
+    })
+                end
     end,
 })
 
@@ -1029,7 +1041,13 @@ Autos:AddToggle("AutoBuyGear", {
     Default = false,
     Callback = function(v)
         Config.AutoBuyGear = v
-        if v then Notify("Auto Buy", Config.SelectedGear .. " Gear enabled", 2) end
+        if v then
+    WindUI:Notify({
+        Title = "Auto Buy",
+        Content = "Weapon Upgrade enabled",
+        Duration = 2
+    })
+                end
     end,
 })
 
