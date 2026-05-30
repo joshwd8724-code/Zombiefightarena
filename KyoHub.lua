@@ -1188,7 +1188,7 @@ Misc:Toggle({
     Callback = function(v) Config.Noclip = v end,
 })
 
-Misc:Toggle
+Misc:Toggle({
     Title = "TP Safe Ground",
     Default = false,
     Callback = function(v) Config.TPSafeGround = v end,
@@ -1232,7 +1232,6 @@ Misc:Toggle({
 })
 
 Misc:AddDivider()
-Misc:AddLabel("Lighting & FPS")
 
 Misc:Toggle({
     Title = "FPS Uncap",
