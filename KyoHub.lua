@@ -1,6 +1,4 @@
 
-local CorrectKey = "kyo-goated"
-
 -- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -995,75 +993,4 @@ function LoadMainHub()
     })
 end
 
--- MUST CALL THIS
-
-
--- KEY WINDOW
-local KeyWindow = WindUI:CreateWindow({
-    Title = "KyoHub Key System",
-    Icon = "key",
-    Theme = "Dark",
-    Size = UDim2.fromOffset(500, 300),
-    HasOutline = true,
-})
-
-local KeyTab = KeyWindow:Tab({
-    Title = "Login",
-    Icon = "lock"
-})
-
--- Paragraph
-KeyTab:Paragraph({
-    Title = "KyoHub Key System",
-    Desc = "Join the Discord server to get the key."
-})
-
--- Discord Button
-KeyTab:Button({
-    Title = "Join Discord For Key",
-    Desc = "Copy Discord invite",
-
-    Callback = function()
-
-        setclipboard("https://discord.gg/MfzqMvsv")
-
-        WindUI:Notify({
-            Title = "Copied",
-            Content = "Discord invite copied!",
-            Duration = 3
-        })
-
-    end
-})
-
-
-KeyTab:Input({
-    Title = "Enter Key",
-    Placeholder = "Type key here...",
-
-    Callback = function(text)
-
-        if text == CorrectKey then
-
-            WindUI:Notify({
-                Title = "Success",
-                Content = "Correct key!",
-                Duration = 3
-            })
-
-            KeyWindow:Destroy()
-
-            LoadMainHub()
-
-        else
-
-            WindUI:Notify({
-                Title = "Wrong Key",
-                Content = "Invalid key.",
-                Duration = 3
-            })
-
-        end
-    end
-})
-
+LoadMainHub()
