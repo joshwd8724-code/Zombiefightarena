@@ -1016,7 +1016,7 @@ Autos:AddToggle("AutoBuyWeapon", {
            Title = "Auto Buy Weapon",
            Content = "Auto Buy Weapon enabled",
            Duration = 2
-    )}
+    })
                 end
     end,
 })
