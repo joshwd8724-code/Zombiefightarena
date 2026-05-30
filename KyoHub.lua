@@ -992,22 +992,21 @@ function LoadMainHub()
             Config.KillAuraV2Multiplier = v
         end
     })
-end
 
 local Autos = MainTab:Section({
       Title = "Auto",
       Icon = "crosshair"
-   )}
+)}
 
-AutoBox:AddToggle("AutoEquip", {
+Autos:AddToggle("AutoEquip", {
     Title = "Auto Equip",
     Default = false,
     Callback = function(v) Config.AutoEquip = v end,
 })
 
-AutoBox:AddDivider()
+Autos:AddDivider()
 
-AutoBox:AddToggle("AutoBuyWeapon", {
+Autos:AddToggle("AutoBuyWeapon", {
     Title = "Auto Buy Weapon",
     Default = false,
     Callback = function(v)
@@ -1016,7 +1015,7 @@ AutoBox:AddToggle("AutoBuyWeapon", {
     end,
 })
 
-AutoBox:AddToggle("AutoBuyHealth", {
+Autos:AddToggle("AutoBuyHealth", {
     Title = "Auto Buy Health",
     Default = false,
     Callback = function(v)
@@ -1025,7 +1024,7 @@ AutoBox:AddToggle("AutoBuyHealth", {
     end,
 })
 
-AutoBox:AddToggle("AutoBuyGear", {
+Autos:AddToggle("AutoBuyGear", {
     Title = "Auto Buy Gear",
     Default = false,
     Callback = function(v)
@@ -1034,7 +1033,7 @@ AutoBox:AddToggle("AutoBuyGear", {
     end,
 })
 
-AutoBox:AddDropdown("SelectedGear", {
+Autos:AddDropdown("SelectedGear", {
     Title = "Gear Type",
     Default = "AutoTurret",
     Values = {
@@ -1047,4 +1046,5 @@ AutoBox:AddDropdown("SelectedGear", {
     Callback = function(v) Config.SelectedGear = v end,
 })
 
+end
 LoadMainHub()
