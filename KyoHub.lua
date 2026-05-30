@@ -1113,7 +1113,7 @@ local MiscCombatBox = MainTab:Section({
       Title = "Misc",
       Icon = "star", 
       Opened = true
-)}
+})
 
 MiscCombatBox:Toggle({
     Title = "Auto Skip Wave",
@@ -1125,7 +1125,7 @@ local Misc = ExtraTab:Section({
       Title = "Miscellaneous",
       Icon = "star",
       Opened = true
-)}
+})
 
 Misc:Toggle({
     Title = "Speed Increase",
@@ -1241,7 +1241,7 @@ Misc:Toggle({
 
 Misc:Slider({
     Title = "FPS Cap",
-    Rounding = 0
+    Rounding = 0,
     Value = {
     Min = 10,
     Max = 600,
