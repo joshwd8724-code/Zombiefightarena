@@ -909,15 +909,6 @@ WindUI:Notify({
     Duration = 2,
 })
 
--- CONFIG MUST BE ABOVE
-local Config = {
-    KillAuraEnabled = false,
-    KillAuraMode = "V1",
-    KillAuraRange = 5000,
-    KillAuraDamage = 999999999,
-    KillAuraV2Multiplier = 1,
-}
-
 function LoadMainHub()
 
     local Window = WindUI:CreateWindow({
@@ -958,30 +949,27 @@ function LoadMainHub()
         Text = "Kill Aura",
         Default = false,
         Tooltip = "Fire ZombieDamage remote on all zombies in range",
-        Callback = function(v)
-            Config.KillAuraEnabled = v
-        end
-    })
+        Callback = function(v) Config.KillAuraEnabled = v end,
+})
 
     CombatBox:Dropdown({
         Text = "Mode",
         Default = "V1",
         Values = { "V1", "V2" },
-        Callback = function(v)
-            Config.KillAuraMode = v
-        end
-    })
-
+        Default = "V1",
+        Callback = function(v) Config.KillAuraMode = v end,
+})
+    
     CombatBox:Slider({
         Text = "Range",
-        Default = 5000,
+        Step = 1,
+        Value = {
         Min = 100,
         Max = 5000,
-        Rounding = 0,
-        Callback = function(v)
-            Config.KillAuraRange = v
-        end
-    })
+        Default = 5000,
+    },
+        Callback = function(v) Config.KillAuraRange = v end,
+    }) 
 
     CombatBox:Divider()
 
