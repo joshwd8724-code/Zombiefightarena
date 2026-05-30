@@ -962,6 +962,29 @@ function LoadMainHub()
     Title = "Become a CC to support us",
     Desc = "To Help grow our discord community, you could become a content creator in our server, by showcasing and promoting our script in tiktok, or youtube through making shorts or long form videos its up to you, or you could become a talker in our community!"
 })
+
+    
+HomeTab:Dropdown({
+    Title = "Theme",
+    Multi = false,
+    AllowNone = false,
+    Value = "Midnight",
+    Values = Themes,
+    Callback = function(v)
+        WindUI:SetTheme(v)
+    end
+})
+
+HomeTab:Toggle({
+    Title = "Transparency",
+    Icon = "palette",
+    Value = WindUI:GetTransparency(),
+    Callback = function(v)
+        Window:ToggleTransparency(v)
+    end
+})
+    
+    
     local CombatBox = MainTab:Section({
         Title = "Kill Aura",
         Icon = "crosshair",
