@@ -933,6 +933,21 @@ function LoadMainHub()
         Title = "Extra",
         Icon = "star",
     })
+
+    local MobilityTab = Window:Tab({
+        Title = "Mobility",
+        Icon = "star",
+    })
+
+    local EspTab = Window:Tab({
+        Title = "Esp",
+        Icon = "star",
+    })
+
+    local SupportTab = Window:Tab({
+        Title = "Support",
+        Icon = "star",
+    })
     -- Sections
     local InfoSection = HomeTab:Section({
         Title = "Information",
@@ -1121,20 +1136,20 @@ MiscCombatBox:Toggle({
     Callback = function(v) Config.AutoSkipWave = v end,
 })
 
-local Misc = ExtraTab:Section({
+local Mobility = MobilityTab:Section({
       Title = "Miscellaneous",
       Icon = "star",
       Opened = true
 })
 
-Misc:Toggle({
+Mobility:Toggle({
     Title = "Speed Increase",
     Default = false,
     Callback = function(v) Config.SpeedHack = v end,
 })
     
     
-Misc:Slider({
+Mobility:Slider({
     Title = "Walk Speed",
     Rounding = 0,
     Value = {
@@ -1145,13 +1160,13 @@ Misc:Slider({
     Callback = function(v) Config.SpeedValue = v end,
 })
     
-Misc:Toggle({
+Mobility:Toggle({
     Title = "Jump Hack",
     Default = false,
     Callback = function(v) Config.JumpHack = v end,
 })
 
-Misc:Slider({
+Mobility:Slider({
     Title = "Jump Power",
     Rounding = 0,
     Value = {
@@ -1162,7 +1177,7 @@ Misc:Slider({
     Callback = function(v) Config.JumpValue = v end,
 })
 
-Misc:Toggle({
+Mobility:Toggle({
     Title = "Fly",
     Default = false,
     Callback = function(v)
@@ -1171,7 +1186,7 @@ Misc:Toggle({
     end,
 })
 
-Misc:Slider({
+Mobility:Slider({
     Title = "Fly Speed",
     Rounding = 0,
     Value = {
@@ -1182,6 +1197,11 @@ Misc:Slider({
     Callback = function(v) Config.FlySpeed = v end,
 })
 
+local Misc = ExtraTab:Section({
+      Title = "Miscellaneous",
+      Icon = "star",
+      Opened = true,
+})
 Misc:Toggle({
     Title = "Noclip",
     Default = false,
@@ -1213,7 +1233,13 @@ Misc:Toggle({
     Callback = function(v) Config.TPSafeZoneV2 = v end,
 })
 
-Misc:Toggle({
+local Esp = EspTab:Section({
+      Title = "Esps",
+      Icon = "star",
+      Opened = true,
+})
+    
+Esp:Toggle({
     Title = "Zombie ESP",
     Default = false,
     Callback = function(v)
@@ -1222,7 +1248,7 @@ Misc:Toggle({
     end,
 })
 
-Misc:Toggle({
+Esp:Toggle({
     Title = "Player ESP",
     Default = false,
     Callback = function(v)
@@ -1231,15 +1257,19 @@ Misc:Toggle({
     end,
 })
 
-Misc:Divider()
 
-Misc:Toggle({
+local Support = SupportTab:Section({
+      Title = "Support",
+      Icon = "star",
+      Opened = true,
+})
+Support:Toggle({
     Title = "FPS Uncap",
     Default = false,
     Callback = function(v) Config.FPSUncap = v; ApplyFPSSettings() end,
 })
 
-Misc:Slider({
+Support:Slider({
     Title = "FPS Cap",
     Rounding = 0,
     Value = {
@@ -1253,7 +1283,7 @@ Misc:Slider({
     end,
 })
 
-Misc:Toggle({
+Support:Toggle({
     Title = "Anti AFK",
     Default = false,
     Callback = function(v)
@@ -1266,19 +1296,19 @@ Misc:Toggle({
     end,
 })
 
-Misc:Toggle({
+Support:Toggle({
     Title = "No Fog",
     Default = false,
     Callback = function(v) Config.NoFog = v; SetNoFog(v) end,
 })
 
-Misc:Toggle({
+Support:Toggle({
     Title = "Full Bright",
     Default = false,
     Callback = function(v) Config.FullBright = v; SetFullBright(v) end,
 })
 
-Misc:Toggle({
+Support:Toggle({
     Title = "FPS Booster",
     Default = false,
     Callback = function(v)
