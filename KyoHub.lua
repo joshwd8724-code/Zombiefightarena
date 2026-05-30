@@ -1136,11 +1136,11 @@ Misc:Toggle({
     
 Misc:Slider({
     Title = "Walk Speed",
-    Default = 24,
+    Rounding = 0,
     Value = {
     Min = 16,
     Max = 200,
-    Rounding = 0,
+    Default = 24,
 },
     Callback = function(v) Config.SpeedValue = v end,
 })
@@ -1153,11 +1153,11 @@ Misc:Toggle({
 
 Misc:Slider({
     Title = "Jump Power",
-    Default = 100,
+    Rounding = 0,
     Value = {
     Min = 50,
     Max = 500,
-    Rounding = 0,
+    Default = 100,
 },
     Callback = function(v) Config.JumpValue = v end,
 })
@@ -1173,11 +1173,11 @@ Misc:Toggle({
 
 Misc:Slider({
     Title = "Fly Speed",
-    Default = 50,
+    Rounding = 0,
     Value = {
     Min = 10,
     Max = 200,
-    Rounding = 0,
+    Default = 60,
 },
     Callback = function(v) Config.FlySpeed = v end,
 })
@@ -1241,11 +1241,11 @@ Misc:Toggle({
 
 Misc:Slider({
     Title = "FPS Cap",
-    Default = 60,
+    Rounding = 0
     Value = {
     Min = 10,
     Max = 600,
-    Rounding = 0,
+    Default = 60,
 },
     Callback = function(v)
         Config.FPSCap = v
