@@ -973,10 +973,12 @@ function LoadMainHub()
 
     CombatBox:Slider({
         Title = "Damage (V1)",
-        Default = 999999999,
+        Step = 1,
+        Value = {
         Min = 1000,
         Max = 999999999,
-        Rounding = 0,
+        Default = 999999999,
+    },
         Callback = function(v)
             Config.KillAuraDamage = v
         end
@@ -984,10 +986,11 @@ function LoadMainHub()
 
     CombatBox:Slider({
         Title = "Multiplier (V2)",
-        Default = 1,
+        Step = 1,
+        Value = {
         Min = 1,
         Max = 100,
-        Rounding = 1,
+    },
         Callback = function(v)
             Config.KillAuraV2Multiplier = v
         end
@@ -998,15 +1001,15 @@ local Autos = MainTab:Section({
       Icon = "crosshair"
 })
 
-Autos:AddToggle("AutoEquip", {
+Autos:Toggle({
     Title = "Auto Equip",
     Default = false,
     Callback = function(v) Config.AutoEquip = v end,
 })
 
-Autos:AddDivider()
+Autos:Divider()
 
-Autos:AddToggle("AutoBuyWeapon", {
+Autos:Toggle({
     Title = "Auto Buy Weapon",
     Default = false,
     Callback = function(v)
@@ -1021,7 +1024,7 @@ Autos:AddToggle("AutoBuyWeapon", {
     end,
 })
 
-Autos:AddToggle("AutoBuyHealth", {
+Autos:Toggle({
     Title = "Auto Buy Health",
     Default = false,
     Callback = function(v)
@@ -1036,7 +1039,7 @@ Autos:AddToggle("AutoBuyHealth", {
     end,
 })
 
-Autos:AddToggle("AutoBuyGear", {
+Autos:AddToggle({
     Title = "Auto Buy Gear",
     Default = false,
     Callback = function(v)
@@ -1051,7 +1054,7 @@ Autos:AddToggle("AutoBuyGear", {
     end,
 })
 
-Autos:AddDropdown("SelectedGear", {
+Autos:AddDropdown({
     Title = "Gear Type",
     Default = "AutoTurret",
     Values = {
