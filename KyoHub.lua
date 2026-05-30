@@ -963,6 +963,12 @@ function LoadMainHub()
     Desc = "To Help grow our discord community, you could become a content creator in our server, by showcasing and promoting our script in tiktok, or youtube through making shorts or long form videos its up to you, or you could become a talker in our community!"
 })
 
+local Themes = {}
+
+for Name, _ in pairs(WindUI:GetThemes()) do
+    table.insert(Themes, Name)
+    end
+    
     
 HomeTab:Dropdown({
     Title = "Theme",
