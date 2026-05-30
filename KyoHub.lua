@@ -1111,7 +1111,7 @@ Autos:AddDropdown({
 
 local MiscCombatBox = MainTab:Section({
       Title = "Misc",
-      Icon = "package", 
+      Icon = "star", 
       Opened = true
 )}
 
@@ -1123,7 +1123,7 @@ MiscCombatBox:AddToggle({
 
 local Misc = ExtraTab:Section({
       Title = "Miscellaneous",
-      Icon = "package",
+      Icon = "star",
       Opened = true
 )}
 
