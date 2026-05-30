@@ -929,6 +929,10 @@ function LoadMainHub()
         Icon = "star"
     })
 
+    local ExtraTab = Window:Tab({
+        Title = "Extra",
+        Icon = "star",
+    })
     -- Sections
     local InfoSection = HomeTab:Section({
         Title = "Information",
@@ -963,23 +967,6 @@ function LoadMainHub()
     Desc = "To Help grow our discord community, you could become a content creator in our server, by showcasing and promoting our script in tiktok, or youtube through making shorts or long form videos its up to you, or you could become a talker in our community!"
 })
 
-local Themes = {}
-
-for Name, _ in pairs(WindUI:GetThemes()) do
-    table.insert(Themes, Name)
-    end
-    
-    
-HomeTab:Dropdown({
-    Title = "Theme",
-    Multi = false,
-    AllowNone = false,
-    Value = "Midnight",
-    Values = Themes,
-    Callback = function(v)
-        WindUI:SetTheme(v)
-    end
-})
 
 HomeTab:Toggle({
     Title = "Transparency",
@@ -1120,6 +1107,185 @@ Autos:AddDropdown({
         "TargetMark","Drone","Spikes","Bunker",
     },
     Callback = function(v) Config.SelectedGear = v end,
+})
+
+local MiscCombatBox = MainTab:Section({
+      Title = "Misc",
+      Icon = "package", 
+      Opened = true
+)}
+
+MiscCombatBox:AddToggle({
+    Title = "Auto Skip Wave",
+    Default = false,
+    Callback = function(v) Config.AutoSkipWave = v end,
+})
+
+local Misc = ExtraTab:Section({
+      Title = "Miscellaneous",
+      Icon = "package",
+      Opened = true
+)}
+
+Misc:Toggle({
+    Title = "Speed Increase",
+    Default = false,
+    Callback = function(v) Config.SpeedHack = v end,
+})
+    
+    
+Misc:Slider({
+    Title = "Walk Speed",
+    Default = 24,
+    Value = {
+    Min = 16,
+    Max = 200,
+    Rounding = 0,
+},
+    Callback = function(v) Config.SpeedValue = v end,
+})
+    
+Misc:Toggle({
+    Title = "Jump Hack",
+    Default = false,
+    Callback = function(v) Config.JumpHack = v end,
+})
+
+Misc:Slider({
+    Title = "Jump Power",
+    Default = 100,
+    Value = {
+    Min = 50,
+    Max = 500,
+    Rounding = 0,
+},
+    Callback = function(v) Config.JumpValue = v end,
+})
+
+Misc:Toggle({
+    Title = "Fly",
+    Default = false,
+    Callback = function(v)
+        Config.Fly = v
+        if not v then DisableFly() end
+    end,
+})
+
+Misc:Slider({
+    Title = "Fly Speed",
+    Default = 50,
+    Value = {
+    Min = 10,
+    Max = 200,
+    Rounding = 0,
+},
+    Callback = function(v) Config.FlySpeed = v end,
+})
+
+Misc:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(v) Config.Noclip = v end,
+})
+
+Misc:Toggle
+    Title = "TP Safe Ground",
+    Default = false,
+    Callback = function(v) Config.TPSafeGround = v end,
+})
+
+Misc:Toggle({
+    Title = "TP Safe Sky",
+    Default = false,
+    Callback = function(v)
+        Config.TPSafeSky = v
+        if not v then
+            if SkyOrigPos and RootPart then RootPart.CFrame = CFrame.new(SkyOrigPos) end
+            SkyOrigPos = nil
+            if SkyPlatform then SkyPlatform:Destroy(); SkyPlatform = nil end
+        end
+    end,
+})
+
+Misc:Toggle({
+    Title = "TP Safe Zone V2",
+    Default = false,
+    Callback = function(v) Config.TPSafeZoneV2 = v end,
+})
+
+Misc:Toggle({
+    Title = "Zombie ESP",
+    Default = false,
+    Callback = function(v)
+        Config.ZombieESP = v
+        RefreshESP()
+    end,
+})
+
+Misc:Toggle({
+    Title = "Player ESP",
+    Default = false,
+    Callback = function(v)
+        Config.PlayerESP = v
+        RefreshESP()
+    end,
+})
+
+Misc:AddDivider()
+Misc:AddLabel("Lighting & FPS")
+
+Misc:Toggle({
+    Title = "FPS Uncap",
+    Default = false,
+    Callback = function(v) Config.FPSUncap = v; ApplyFPSSettings() end,
+})
+
+Misc:Slider({
+    Title = "FPS Cap",
+    Default = 60,
+    Value = {
+    Min = 10,
+    Max = 600,
+    Rounding = 0,
+},
+    Callback = function(v)
+        Config.FPSCap = v
+        if Config.FPSUncap then ApplyFPSSettings() end
+    end,
+})
+
+Misc:Toggle({
+    Title = "Anti AFK",
+    Default = false,
+    Callback = function(v)
+        Config.AntiAFK = v
+        if v then
+            SetupAntiAFK()
+        else
+            if AntiAFKIdledConn then AntiAFKIdledConn:Disconnect() end
+        end
+    end,
+})
+
+Misc:Toggle({
+    Title = "No Fog",
+    Default = false,
+    Callback = function(v) Config.NoFog = v; SetNoFog(v) end,
+})
+
+Misc:Toggle({
+    Title = "Full Bright",
+    Default = false,
+    Callback = function(v) Config.FullBright = v; SetFullBright(v) end,
+})
+
+Misc:Toggle({
+    Title = "FPS Booster",
+    Default = false,
+    Callback = function(v)
+        Config.FPSBooster = v
+        if v then EnableFPSBooster() else DisableFPSBooster() end
+    end,
 })
 
 end
