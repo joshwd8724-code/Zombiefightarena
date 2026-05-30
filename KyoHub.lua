@@ -1081,7 +1081,7 @@ Autos:Toggle({
     end,
 })
 
-Autos:AddToggle({
+Autos:Toggle({
     Title = "Auto Buy Gear",
     Default = false,
     Callback = function(v)
@@ -1096,7 +1096,7 @@ Autos:AddToggle({
     end,
 })
 
-Autos:AddDropdown({
+Autos:Dropdown({
     Title = "Gear Type",
     Default = "AutoTurret",
     Values = {
@@ -1115,7 +1115,7 @@ local MiscCombatBox = MainTab:Section({
       Opened = true
 )}
 
-MiscCombatBox:AddToggle({
+MiscCombatBox:Toggle({
     Title = "Auto Skip Wave",
     Default = false,
     Callback = function(v) Config.AutoSkipWave = v end,
@@ -1231,7 +1231,7 @@ Misc:Toggle({
     end,
 })
 
-Misc:AddDivider()
+Misc:Divider()
 
 Misc:Toggle({
     Title = "FPS Uncap",
