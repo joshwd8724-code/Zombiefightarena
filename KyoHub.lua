@@ -915,6 +915,7 @@ function LoadMainHub()
         Theme = "Dark",
         Size = UDim2.fromOffset(620, 460),
         HasOutline = true,
+        Acrylic = true,
     })
 
     -- Tabs (INSIDE FUNCTION)
