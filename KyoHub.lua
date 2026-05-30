@@ -931,7 +931,8 @@ function LoadMainHub()
 
     -- Sections
     local InfoSection = HomeTab:Section({
-        Title = "Information"
+        Title = "Information",
+        Opened = true
     })
 
     InfoSection:Paragraph({
@@ -963,7 +964,8 @@ function LoadMainHub()
 })
     local CombatBox = MainTab:Section({
         Title = "Kill Aura",
-        Icon = "crosshair"
+        Icon = "crosshair",
+        Opened = true
     })
 
     CombatBox:Toggle({
@@ -1021,7 +1023,8 @@ function LoadMainHub()
 
 local Autos = MainTab:Section({
       Title = "Auto",
-      Icon = "crosshair"
+      Icon = "crosshair",
+      Opened = true
 })
 
 Autos:Toggle({
