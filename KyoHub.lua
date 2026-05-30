@@ -936,9 +936,31 @@ function LoadMainHub()
 
     InfoSection:Paragraph({
     Title = "Welcome",
-    Desc = "Thank you for using KyoHub! Join our Discord for updates."
+    Desc = "Thank you for using KyoHub! If you want to help us Grow our server and participate in growing our community, then feel free to join our discord server, also if you want you could apply for content creator role and promote our script!"
 })
 
+    InfoSection:Button({
+    Title = "Copy Discord Invite",
+    Callback = function()
+        setclipboard("https://discord.gg/3MRs9AKy")
+
+        WindUI:Notify({
+            Title = "Copied",
+            Content = "Our Discord invite copied to clipboard",
+            Duration = 2
+        })
+    end
+})
+
+    HomeTab:Paragraph({
+    Title = "Player Info",
+    Desc = "Username: "..game.Players.LocalPlayer.Name
+})
+
+    InfoSection:Paragraph({
+    Title = "Become a CC to support us",
+    Desc = "To Help grow our discord community, you could become a content creator in our server, by showcasing and promoting our script in tiktok, or youtube through making shorts or long form videos its up to you, or you could become a talker in our community!"
+})
     local CombatBox = MainTab:Section({
         Title = "Kill Aura",
         Icon = "crosshair"
