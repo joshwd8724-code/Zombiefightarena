@@ -999,7 +999,6 @@ end
 -- MUST CALL THIS
 
 
-LoadMainHub()
 -- KEY WINDOW
 local KeyWindow = WindUI:CreateWindow({
     Title = "KyoHub Key System",
