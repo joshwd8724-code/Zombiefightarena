@@ -912,7 +912,7 @@ function LoadMainHub()
     local Window = WindUI:CreateWindow({
         Title = "KyoHub",
         Icon = "star",
-        Theme = "Dark",
+        Theme = "Midnight",
         Size = UDim2.fromOffset(620, 460),
         HasOutline = true,
         Acrylic = true,
